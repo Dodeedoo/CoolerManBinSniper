@@ -129,4 +129,6 @@ dmypy.json
 .pyre/
 
 #replit
-.repl
+.replit
+.lock
+.toml
