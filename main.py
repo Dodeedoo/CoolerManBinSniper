@@ -107,12 +107,13 @@ def update():
     auctions = getInfo(auctionlink)
     start = time.time()
     top500 = sorted(itemlists, key=itemlists.get, reverse=True)[:500]
+    pricelist = {}
     #print(json.dumps(top500, indent=2))
     for y in range(0, auctions["totalPages"]):
+        time.sleep(0.05)
         print(y)
         auctionlink = f"https://api.hypixel.net/skyblock/auctions?page={y}"
         auctions = getInfo(auctionlink)
-        pricelist = {}
         for x in range(0, 1000):
             try:
                 item = auctions["auctions"][x]
@@ -127,16 +128,13 @@ def update():
                 print("error occurred")
                 print(traceback.format_exc())
             except IndexError:
-                print("error occurred")
-                print(traceback.format_exc())
-        print(json.dumps(pricelist, indent=3))
-        for z in range(-1, len(top500)):
-            toplist[top500[z]] = itemindex.Item(pricelist[top500[z]], top500[z])
+                pass
+        #print(json.dumps(pricelist, indent=3))
+    for z in range(-1, len(top500)):
+        toplist[top500[z]] = itemindex.Item(pricelist[top500[z]], top500[z])
     for y in toplist:
         prices = itemindex.Item.getprices(toplist[y])
-        print(str(len(prices)) + str(y))
         if len(prices) > 5:
-            print(y)
             prices.sort()
             prices.pop()
             prices.pop()
@@ -149,6 +147,7 @@ def update():
                 print(y)
                 print(str(min(prices)) + " snipe")
                 print(str(average) + " avg")
+                print(str(len(prices)) + " on AH")
                 print(" ")
     end = time.time()
     print(end - start)
