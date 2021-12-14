@@ -7,7 +7,6 @@ import itemindex
 import time
 import sched
 import cProfile, pstats, io
-from numba import jit
 
 
 def profile(fnc):
@@ -135,11 +134,9 @@ def update():
     for y in toplist:
         prices = itemindex.Item.getprices(toplist[y])
         if len(prices) > 5:
-            prices.sort()
-            prices.pop()
-            prices.pop()
-            prices.pop()
-            average = sum(prices) / len(prices)
+            prices.sort(reverse=True)
+            amount = len(prices) * 0.25
+            average = sum(sorted(prices)[:int(amount)]) / amount
             average = int(average)
             reqmargin = average / float(margin)
             if min(prices) + int(reqmargin) <= average:
