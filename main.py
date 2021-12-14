@@ -96,7 +96,6 @@ for x in itemlists:
         pet.append(x)
 for x in pet:
     itemlists.pop(x)
-print(json.dumps(itemlists, indent=2))
 
 
 @profile
@@ -107,6 +106,7 @@ def update():
     start = time.time()
     top500 = sorted(itemlists, key=itemlists.get, reverse=True)[:500]
     pricelist = {}
+    cmdlist = {}
     #print(json.dumps(top500, indent=2))
     for y in range(0, auctions["totalPages"]):
         time.sleep(0.05)
@@ -121,8 +121,10 @@ def update():
                     if name in top500:
                         if name in pricelist:
                             pricelist[name].append(item["starting_bid"])
+                            cmdlist[name].append(item["_id"])
                         else:
                             pricelist[name] = [item["starting_bid"]]
+                            cmdlist[name] = [item["_id"]]
             except KeyError:
                 print("error occurred")
                 print(traceback.format_exc())
@@ -130,12 +132,12 @@ def update():
                 pass
         #print(json.dumps(pricelist, indent=3))
     for z in range(-1, len(top500)):
-        toplist[top500[z]] = itemindex.Item(pricelist[top500[z]], top500[z])
+        toplist[top500[z]] = itemindex.Item(pricelist[top500[z]], top500[z], cmdlist[top500[z]])
     for y in toplist:
         prices = itemindex.Item.getprices(toplist[y])
         if len(prices) > 5:
             prices.sort(reverse=True)
-            amount = len(prices) * 0.25
+            amount = len(prices) * 0.1
             average = sum(sorted(prices)[:int(amount)]) / amount
             average = int(average)
             reqmargin = average / float(margin)
@@ -144,6 +146,8 @@ def update():
                 print(y)
                 print(str(min(prices)) + " snipe")
                 print(str(average) + " avg")
+                print(str(average - min(prices)) + " Estimated Profit")
+                print("Command copied to ClipBoard /viewauction ")
                 print(str(len(prices)) + " on AH")
                 print(" ")
     end = time.time()
