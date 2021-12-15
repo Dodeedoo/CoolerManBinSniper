@@ -97,8 +97,6 @@ for x in itemlists:
 for x in pet:
     itemlists.pop(x)
 
-
-@profile
 def update():
     print("updated")
     auctionlink = f"https://api.hypixel.net/skyblock/auctions?page=0"
@@ -120,11 +118,16 @@ def update():
                     name = namerep(item["item_name"])
                     if name in top500:
                         if name in pricelist:
-                            pricelist[name].append(item["starting_bid"])
-                            cmdlist[name].append(item["_id"])
+                            pricelist[name][x] = item["starting_bid"]
                         else:
-                            pricelist[name] = [item["starting_bid"]]
-                            cmdlist[name] = [item["_id"]]
+                            pricelist[name] = {}
+                            pricelist[name][x] = item["starting_bid"]
+
+                        if name in cmdlist:
+                            cmdlist[name][x] = item["uuid"]
+                        else:
+                            cmdlist[name] = {}
+                            cmdlist[name][x] = item["uuid"]
             except KeyError:
                 print("error occurred")
                 print(traceback.format_exc())
@@ -134,20 +137,27 @@ def update():
     for z in range(-1, len(top500)):
         toplist[top500[z]] = itemindex.Item(pricelist[top500[z]], top500[z], cmdlist[top500[z]])
     for y in toplist:
-        prices = itemindex.Item.getprices(toplist[y])
+        pricedict = itemindex.Item.getprices(toplist[y])
+        prices = [pricedict[z] for z in pricedict.keys()]
         if len(prices) > 5:
-            prices.sort(reverse=True)
             amount = len(prices) * 0.1
-            average = sum(sorted(prices)[:int(amount)]) / amount
+            totals = 0
+            sortedstuff = sorted(prices)[:int(amount)]
+            for x in range(0, len(sortedstuff)):
+                totals = totals + sortedstuff[x]
+            average = totals / amount
             average = int(average)
             reqmargin = average / float(margin)
             if min(prices) + int(reqmargin) <= average:
+                ahdict = itemindex.Item.getcmd(toplist[y])
                 print(" ")
                 print(y)
                 print(str(min(prices)) + " snipe")
                 print(str(average) + " avg")
                 print(str(average - min(prices)) + " Estimated Profit")
-                print("Command copied to ClipBoard /viewauction ")
+                for key, value in pricedict.items():
+                    if value == min(prices):
+                        print("Command /viewauction " + str(ahdict[key]))
                 print(str(len(prices)) + " on AH")
                 print(" ")
     end = time.time()
